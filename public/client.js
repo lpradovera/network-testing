@@ -7,12 +7,97 @@ var lastResult = null;
 
 ready(function() {
   _timer = performance.now();
+  listAvailableCodecs();
+  patchRTCPeerCodecs();
   connect();
 });
+
+function getWantedCodecs() {
+  const el = document.getElementById('codecs')
+  const codecs = Array.from(el.selectedOptions).map(({ value }) => value)
+  return {
+    audio: codecs,
+    video: ['video/VP8'],
+  }
+}
+
+function listAvailableCodecs() {
+  const { codecs: availSend } = RTCRtpSender.getCapabilities('audio');
+  console.log('codecs', availSend);
+  availSend.forEach(row => {
+    const option = document.createElement('option');
+    option.value = row.mimeType;
+    option.text = row.mimeType;
+    option.selected = true;
+    document.getElementById('codecs').appendChild(option);
+  });
+}
+
+function patchRTCPeerCodecs() {
+
+  const mediaTypes = ['audio', 'video']
+
+  const _createOffer = RTCPeerConnection.prototype.createOffer;
+  const _createAnswer = RTCPeerConnection.prototype.createAnswer;
+
+  function patch() {
+    const wantedCodecs = getWantedCodecs()
+    
+    mediaTypes.forEach(media => {
+      const transceiver = this.getTransceivers().find(t => {
+        return t.sender.track.kind === media
+      })
+      if (transceiver) {
+        const { codecs: availSend } = RTCRtpSender.getCapabilities(media);
+        const { codecs: availRecv } = RTCRtpReceiver.getCapabilities(media);
+        const newCodecs = []
+        availSend.forEach(row => {
+          if (wantedCodecs[media].includes(row.mimeType)) {
+            newCodecs.push(row)
+          }
+        })
+        availRecv.forEach(row => {
+          if (wantedCodecs[media].includes(row.mimeType)) {
+            newCodecs.push(row)
+          }
+        })
+        console.log('availSend', availSend)
+        console.log('availRecv', availRecv)
+        console.log('Applying this codecs', JSON.stringify(newCodecs), 'for', media)
+        transceiver.setCodecPreferences(newCodecs)
+      } else {
+        console.warn('No transceiver found for ', media)
+      }
+    })
+  }
+
+
+  RTCPeerConnection.prototype.createOffer = function(options) {
+    try {
+      console.log('This offer', this)
+      patch.apply(this)
+    } catch (error) {
+      console.error('Error patching offer', error)
+    }
+
+    return _createOffer.apply(this, options);
+  }
+
+  RTCPeerConnection.prototype.createAnswer = function(options) {
+    try {
+      patch.apply(this)
+    } catch (error) {
+      console.error('Error patching answer', error)
+    }
+
+    return _createAnswer.apply(this, options);
+  };
+}
 
 /**
   * Connect with Relay creating a client and attaching all the event handler.
 */
+
 function connect() {
   client = new Relay({
     project: project,
@@ -154,6 +239,21 @@ function hide(selector) {
 
 function setStatus(text) {
   document.getElementById("status").innerHTML = text;
+}
+
+function getSelectValues(select) {
+  var result = [];
+  var options = select && select.options;
+  var opt;
+
+  for (var i=0, iLen=options.length; i<iLen; i++) {
+    opt = options[i];
+
+    if (opt.selected) {
+      result.push(opt.value || opt.text);
+    }
+  }
+  return result;
 }
 
 async function toggleStats() {
