@@ -203,6 +203,13 @@ function handleCallUpdate(call) {
 */
 function makeCall() {
   clearElementbyId('stats');
+  //manipulate ICE servers
+  if (forceTcp.checked == true) {
+    var serverList = client.iceServers;
+    serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
+    client.iceServers = serverList;
+  }
+  console.log('using ICE servers', client.iceServers)
   
   _timer = performance.now();
   var destination = document.getElementById('destination').value
