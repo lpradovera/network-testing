@@ -45,7 +45,12 @@ function patchRTCPeerCodecs() {
 
     mediaTypes.forEach(media => {
       const transceiver = this.getTransceivers().find(t => {
-        return t.sender.track.kind === media
+        if (t.sender.track) {
+          return t.sender.track.kind === media
+        } else {
+          return false
+        }
+       
       })
       if (transceiver) {
         const { codecs: availSend } = RTCRtpSender.getCapabilities(media);
