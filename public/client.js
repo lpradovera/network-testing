@@ -7,8 +7,8 @@ var lastResult = null;
 
 ready(function() {
   _timer = performance.now();
-  // listAvailableCodecs();
-  // patchRTCPeerCodecs();
+  listAvailableCodecs();
+  patchRTCPeerCodecs();
   connect();
 });
 
@@ -117,7 +117,7 @@ function connect() {
     show('callForm');
     reportTimerStat('client connect', performance.now() - _timer);
     if (forceTcp.checked == true) {
-      // manipulateIce();
+      manipulateIce();
     }
     _timer = null
   });
