@@ -7,8 +7,8 @@ var lastResult = null;
 
 ready(function() {
   _timer = performance.now();
-  listAvailableCodecs();
-  patchRTCPeerCodecs();
+  // listAvailableCodecs();
+  // patchRTCPeerCodecs();
   connect();
 });
 
@@ -104,12 +104,6 @@ function connect() {
     token: token
   });
 
-  client.iceServers = [
-      {
-        "urls": [ "stun:stun.l.google.com:19302" ]
-      }
-    ]
-
   client.__logger.setLevel(client.__logger.levels.INFO)
 
   client.remoteElement = 'remoteVideo';
@@ -122,6 +116,9 @@ function connect() {
     setStatus('Registered to SignalWire');
     show('callForm');
     reportTimerStat('client connect', performance.now() - _timer);
+    if (forceTcp.checked == true) {
+      // manipulateIce();
+    }
     _timer = null
   });
 
@@ -176,7 +173,9 @@ function handleCallUpdate(call) {
       setStatus('Ringing...');
       break;
     case 'ringing': // Someone is calling you
-      // we don't actually need this here
+      console.log('Inbound ringing...');
+      console.log('using ICE servers', client.iceServers)
+      currentCall.answer();
       break;
     case 'active': // Call has become active
       setStatus('Call is active');
@@ -203,14 +202,6 @@ function handleCallUpdate(call) {
 */
 function makeCall() {
   clearElementbyId('stats');
-  //manipulate ICE servers
-  if (forceTcp.checked == true) {
-    var serverList = client.iceServers;
-    serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
-    client.iceServers = serverList;
-  }
-  console.log('using ICE servers', client.iceServers)
-  
   _timer = performance.now();
   var destination = document.getElementById('destination').value
   console.log('Calling ', destination);
@@ -359,6 +350,13 @@ function reportTimerStat(title, stat) {
 
 function clearElementbyId(id) {
   document.getElementById(id).innerHTML = "";
+}
+
+function manipulateIce() {
+  var serverList = client.iceServers;
+  serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
+  client.iceServers = serverList;
+  console.log('setting ICE servers', client.iceServers)
 }
 
 // jQuery document.ready equivalent

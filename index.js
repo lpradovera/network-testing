@@ -22,8 +22,10 @@ async function apiRequest(endpoint, payload = {}, method = 'POST') {
 app.get('/', async (req, res) => {
   var defaultDestination = process.env.DEFAULT_DESTINATION
   var projectId = process.env.SIGNALWIRE_PROJECT_KEY
-  var token = await apiRequest('/api/relay/rest/jwt', { expires_in: 120, resource: 'myclient' }) 
-  res.render('index', { defaultDestination, projectId, token: token.jwt_token });
+  var tokenName = req.query.tokenName || 'myclient'
+  var forceTcp = req.query.forceTcp || 'false'
+  var token = await apiRequest('/api/relay/rest/jwt', { expires_in: 120, resource: tokenName })
+  res.render('index', { defaultDestination, projectId, token: token.jwt_token, name: tokenName, forceTcp });
 })
 
 const port = process.env.PORT || 3000;
