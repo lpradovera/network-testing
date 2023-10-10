@@ -42,7 +42,7 @@ function patchRTCPeerCodecs() {
 
   function patch() {
     const wantedCodecs = getWantedCodecs()
-    
+
     mediaTypes.forEach(media => {
       const transceiver = this.getTransceivers().find(t => {
         return t.sender.track.kind === media
