@@ -104,6 +104,27 @@ function patchRTCPeerCodecs() {
 */
 
 function connect() {
+  // Keep stable ref of "setConfiguration" fn
+  const _setConfiguration = RTCPeerConnection.prototype.setConfiguration;
+
+  // Patch it
+  RTCPeerConnection.prototype.setConfiguration = function(options) {
+    console.log('Patch setConfiguration options', options)
+
+    if (options.iceServers) {
+      // update urls for each iceServer
+      options.iceServers = options.iceServers.map(row => {
+        return {
+          ...row,
+          urls: row.urls.map(u => `${u}?transport=tcp`)
+        }
+      })
+    }
+
+    // return the stable ref
+    return _setConfiguration(options);
+  }
+  
   client = new Relay({
     project: project,
     token: token
@@ -215,7 +236,7 @@ function makeCall() {
     audio: true,
     video: false,
   };
-
+  console.log('using ICE servers', client.iceServers)
   currentCall = client.newCall(params);
 }
 
@@ -358,10 +379,10 @@ function clearElementbyId(id) {
 }
 
 function manipulateIce() {
-  var serverList = client.iceServers;
-  serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
-  client.iceServers = serverList;
-  console.log('setting ICE servers', client.iceServers)
+  // var serverList = client.iceServers;
+  // serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
+  // client.iceServers = serverList;
+  // console.log('setting ICE servers', client.iceServers)
 }
 
 // jQuery document.ready equivalent
