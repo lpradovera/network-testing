@@ -99,32 +99,31 @@ function patchRTCPeerCodecs() {
   };
 }
 
+const _setConfiguration = RTCPeerConnection.prototype.setConfiguration;
+
+// Patch it
+RTCPeerConnection.prototype.setConfiguration = function(options) {
+  console.log('Patch setConfiguration options', options)
+
+  if (options.iceServers) {
+    // update urls for each iceServer
+    options.iceServers = options.iceServers.map(row => {
+      return {
+        ...row,
+        urls: row.urls.map(u => `${u}?transport=tcp`)
+      }
+    })
+  }
+
+  // return the stable ref
+  return _setConfiguration(options);
+}
+
 /**
   * Connect with Relay creating a client and attaching all the event handler.
 */
 
 function connect() {
-  // Keep stable ref of "setConfiguration" fn
-  const _setConfiguration = RTCPeerConnection.prototype.setConfiguration;
-
-  // Patch it
-  RTCPeerConnection.prototype.setConfiguration = function(options) {
-    console.log('Patch setConfiguration options', options)
-
-    if (options.iceServers) {
-      // update urls for each iceServer
-      options.iceServers = options.iceServers.map(row => {
-        return {
-          ...row,
-          urls: row.urls.map(u => `${u}?transport=tcp`)
-        }
-      })
-    }
-
-    // return the stable ref
-    return _setConfiguration(options);
-  }
-  
   client = new Relay({
     project: project,
     token: token
@@ -142,9 +141,6 @@ function connect() {
     setStatus('Registered to SignalWire');
     show('callForm');
     reportTimerStat('client connect', performance.now() - _timer);
-    if (forceTcp.checked == true) {
-      manipulateIce();
-    }
     _timer = null
   });
 
@@ -376,13 +372,6 @@ function reportTimerStat(title, stat) {
 
 function clearElementbyId(id) {
   document.getElementById(id).innerHTML = "";
-}
-
-function manipulateIce() {
-  // var serverList = client.iceServers;
-  // serverList[0].urls[0] = serverList[0].urls[0] + '?transport=tcp';
-  // client.iceServers = serverList;
-  // console.log('setting ICE servers', client.iceServers)
 }
 
 // jQuery document.ready equivalent
