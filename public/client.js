@@ -121,9 +121,7 @@ function connect() {
     setStatus('Registered to SignalWire');
     show('callForm');
     reportTimerStat('client connect', performance.now() - _timer);
-    if (forceTcp.checked == true) {
-      manipulateIce();
-    }
+
     _timer = null
   });
 
@@ -179,6 +177,9 @@ function handleCallUpdate(call) {
       break;
     case 'ringing': // Someone is calling you
       console.log('Inbound ringing...');
+      if (forceTcp.checked == true) {
+        manipulateIce();
+      }
       console.log('using ICE servers', client.iceServers)
       currentCall.answer();
       break;
