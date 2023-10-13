@@ -59,12 +59,13 @@
     </div>
     
     <h1>Remote Video</h1>
-    <video id="remoteVideo" style="width: 640px; height: 360px; background-color: black;"></video>
+    <video id="remoteVideo" controls style="width: 640px; height: 360px; background-color: black;"></video>
     <h1>Local Video</h1>
-    <video id="localVideo" style="width: 640px; height: 360px; background-color: red;"></video>
+    <video id="localVideo" controls style="width: 640px; height: 360px; background-color: red;"></video>
 
     <script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@signalwire/js@^1"></script>
+    <script type="text/javascript" src="/sdk_1_2_9.min.js"></script>
+    <!-- <script type="text/javascript" src="https://unpkg.com/@signalwire/js@^1"></script> -->
     <script type="text/javascript">
       var project = "<%= projectId %>";
       var token = "<%= token %>";
