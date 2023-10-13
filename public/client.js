@@ -193,7 +193,8 @@ function handleCallUpdate(call) {
     case 'ringing': // Someone is calling you
       console.log('Inbound ringing...');
       console.log('using ICE servers', client.iceServers)
-      currentCall.answer();
+      // currentCall.answer();
+      currentCall.answer({ iceTransportPolicy: 'relay' });
       break;
     case 'active': // Call has become active
       setStatus('Call is active');
