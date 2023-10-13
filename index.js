@@ -26,8 +26,9 @@ app.get('/', async (req, res) => {
   var forceTcp = req.query.forceTcp == 'true';
   var relayHost = process.env.SIGNALWIRE_RELAY_HOST || 'relay.signalwire.com'
   var token = await apiRequest('/api/relay/rest/jwt', { expires_in: 120, resource: tokenName })
-  console.log(`curl -XPOST --location 'https://${process.env.SIGNALWIRE_SPACE}/api/laml/2010-04-01/Accounts/${process.env.SIGNALWIRE_PROJECT_KEY}/Calls' --user '${process.env.SIGNALWIRE_PROJECT_KEY}:${process.env.SIGNALWIRE_TOKEN}' --data-urlencode 'Url=https://lpradovera.signalwire.com/laml-bins/ac601f38-be7a-4c53-a557-2d033c53b7e4' --data-urlencode 'From=${process.env.CALLER_ID}' --data-urlencode 'To=verto:${tokenName}@${process.env.SIGNALWIRE_VERTO_DOMAIN}'`)
-  res.render('index', { defaultDestination, projectId, token: token.jwt_token, name: tokenName, forceTcp, relayHost });
+  var curlString = `curl -XPOST --location 'https://${process.env.SIGNALWIRE_SPACE}/api/laml/2010-04-01/Accounts/${process.env.SIGNALWIRE_PROJECT_KEY}/Calls' --user '${process.env.SIGNALWIRE_PROJECT_KEY}:${process.env.SIGNALWIRE_TOKEN}' --data-urlencode 'Url=https://lpradovera.signalwire.com/laml-bins/40db8a19-4c5b-41b6-9f62-b6c51e201a07' --data-urlencode 'From=${process.env.CALLER_ID}' --data-urlencode 'To=verto:${tokenName}@${process.env.SIGNALWIRE_VERTO_DOMAIN}'`
+  console.log(curlString)
+  res.render('index', { defaultDestination, projectId, token: token.jwt_token, name: tokenName, forceTcp, relayHost, curlString });
 })
 
 const port = process.env.PORT || 3000;
