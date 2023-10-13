@@ -106,7 +106,8 @@ function patchRTCPeerCodecs() {
 function connect() {
   client = new Relay({
     project: project,
-    token: token
+    token: token,
+    host: relayHost
   });
 
   client.__logger.setLevel(client.__logger.levels.INFO)

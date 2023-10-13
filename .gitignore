@@ -56,6 +56,7 @@ node_modules
 obj
 bin
 .env
+.env.prod
 .bundle
 vendor/
 __pycache__
