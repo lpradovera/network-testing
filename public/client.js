@@ -105,6 +105,7 @@ function patchRTCPeerCodecs() {
 
 function connect() {
   client = new Relay({
+    host: 'relay.swire.io',
     project: project,
     token: token,
     host: relayHost
@@ -113,6 +114,18 @@ function connect() {
   client.__logger.setLevel(client.__logger.levels.INFO)
 
   client.remoteElement = 'remoteVideo';
+
+  const video = document.getElementById('remoteVideo')
+  const events = [
+    'audioprocess', 'canplay', 'canplaythrough', 'complete', 'durationchange', 'emptied', 'ended', 'error', 'loadeddata', 'loadedmetadata', 'loadstart', 'pause', 'play', 'playing', 'progress', 'ratechange', 'seeked', 'seeking', 'stalled', 'suspend', 'timeupdate', 'volumechange', 'waiting'
+  ]
+  console.log(video)
+  events.forEach(evt => {
+    video.addEventListener(evt, () => {
+      console.log('Remote Video Event', evt)
+    })
+  })
+
   client.localElement = 'localVideo';
 
   client.enableMicrophone();
@@ -181,13 +194,14 @@ function handleCallUpdate(call) {
     case 'ringing': // Someone is calling you
       console.log('Inbound ringing...');
       console.log('using ICE servers', client.iceServers)
-      currentCall.answer();
+      // currentCall.answer();
+      currentCall.answer({ iceTransportPolicy: 'relay' });
       break;
     case 'active': // Call has become active
       setStatus('Call is active');
       hide('callbtn');
       show('hangupbtn');
-      toggleStats();
+      // toggleStats();
       reportTimerStat('call setup', performance.now() - _timer);
       _timer = null
       break;
@@ -195,7 +209,7 @@ function handleCallUpdate(call) {
       setStatus('Ready');
       show('callbtn');
       hide('hangupbtn');
-      toggleStats();
+      // toggleStats();
       break;
     case 'destroy': // Call has been destroyed
       currentCall = null;
